@@ -26,5 +26,9 @@ endfunction
 " plugin manifest
 call remote#host#Register(s:plugin_name, 'x', function('s:JobStart'))
 
+call remote#host#RegisterPlugin('lspmeta', '0', [
+\ {'type': 'command', 'name': 'LspInstall', 'sync': 0, 'opts': {'bang': ''}},
+\ ])
+
 let &cpo = s:save_cpo
 unlet s:save_cpo

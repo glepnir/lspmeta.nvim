@@ -4,19 +4,10 @@
 package main
 
 import (
-	"os"
-	"os/signal"
-	"syscall"
-
+	"github.com/glepnir/lspmeta.nvim/pkg"
 	"github.com/neovim/go-client/nvim/plugin"
 )
 
 func main() {
-	plugin.Main(func(p *plugin.Plugin) error {
-		return nil
-	})
-
-	termChan := make(chan os.Signal)
-	signal.Notify(termChan, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
-	<-termChan
+	plugin.Main(pkg.Register)
 }
