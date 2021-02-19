@@ -1,7 +1,6 @@
 // Copyright 2021 glepnir. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-
 package pkg
 
 import (
@@ -19,7 +18,6 @@ func Register(p *plugin.Plugin) error {
 	if err != nil {
 		return err
 	}
-
 	c := NewCommand(v)
 	p.HandleCommand(&plugin.CommandOptions{
 		Name:     "LspInstall",
@@ -32,6 +30,8 @@ func Register(p *plugin.Plugin) error {
 		Bang:     true,
 		Register: false,
 		Bar:      false,
-	}, c.LspInstall)
+	}, func(args []string, bang bool) {
+		c.LspInstall(args, bang)
+	})
 	return nil
 }

@@ -15,7 +15,7 @@ function lspmeta.get_user_config_server()
     end
   end
 
-  local configs = require('lspconfig.configs')
+  local configs = require('lspconfig/configs')
   return vim.tbl_keys(configs)
 end
 

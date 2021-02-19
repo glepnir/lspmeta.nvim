@@ -5,28 +5,28 @@
 package pkg
 
 import (
-	"log"
-
+	"github.com/glepnir/lspmeta.nvim/pkg/logger"
 	"github.com/neovim/go-client/nvim"
 )
 
 type Command struct {
-	v *nvim.Nvim
+	nvim   *nvim.Nvim
+	logger *logger.Logger
 }
 
-func NewCommand(v *nvim.Nvim) *Command {
-	return &Command{}
+func NewCommand(v *nvim.Nvim, l *logger.Logger) *Command {
+	return &Command{
+		nvim:   v,
+		logger: l,
+	}
 }
 
 type userLspServers []string
 
-func (c *Command) LspInstall() {
+func (c *Command) LspInstall(args []string, bang bool) {
 	userConfig := userLspServers{}
-	print("here")
 	getUserConfig := "require('lspmeta').get_user_config_server()"
-	err := c.v.ExecLua(getUserConfig, userConfig)
-	print(userConfig)
-	if err != nil {
-		log.Fatal("[LspMeta] Get User config failed")
+	if err := c.nvim.ExecLua(getUserConfig, userConfig); err != nil {
+		c.logger.Print(err)
 	}
 }
