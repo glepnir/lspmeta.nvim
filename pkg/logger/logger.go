@@ -6,46 +6,37 @@ package logger
 
 import (
 	"context"
-	"io"
 	"os"
-	"path"
 
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
-	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 type Logger struct {
 	logger *zerolog.Logger
 }
 
+var (
+	loggerCtxKey struct{}
+	traceIdKey   struct{}
+)
+
 func NewTraceIdContext(ctx context.Context, traceID string) context.Context {
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	return context.WithValue(ctx, "traceID", traceID)
+	return context.WithValue(ctx, traceIdKey, traceID)
 }
 
-func newRollingFile(logDir string) io.Writer {
-	if err := os.MkdirAll(logDir, os.ModePerm); err != nil {
-		log.Error().Err(
-			err,
-		).Str(
-			"path",
-			logDir,
-		).Msg(
-			"can't create log directory",
-		)
+func NewContextLogger(ctx context.Context, logger *Logger) context.Context {
+	return context.WithValue(ctx, loggerCtxKey, logger)
+}
+
+func FromContext(ctx context.Context) *Logger {
+	logger, ok := ctx.Value(loggerCtxKey).(*Logger)
+	if !ok {
 		return nil
 	}
-	return &lumberjack.Logger{
-		Filename:   path.Join(logDir, "lspmeta.log"),
-		MaxSize:    0,
-		MaxAge:     0,
-		MaxBackups: 0,
-		LocalTime:  false,
-		Compress:   false,
-	}
+	return logger
 }
 
 func NewLogger(isDebug bool, logDir string) (*Logger, error) {
@@ -53,30 +44,19 @@ func NewLogger(isDebug bool, logDir string) (*Logger, error) {
 	if isDebug {
 		logLevel = zerolog.DebugLevel
 	}
-	writer := newRollingFile(logDir)
 	zerolog.TimestampFieldName = "t"
 	zerolog.LevelFieldName = "t"
 	zerolog.MessageFieldName = "m"
 	zerolog.CallerFieldName = "c"
 	zerolog.SetGlobalLevel(logLevel)
-	logger := zerolog.New(writer).With().Timestamp().Caller().Logger()
+	logger := zerolog.New(os.Stdout).With().Timestamp().Caller().Logger()
 	return &Logger{logger: &logger}, nil
 }
 
-func WithContext(ctx context.Context) *Logger {
-	if ctx == nil {
-		logger, err := NewLogger(true, "ss")
-		if err != nil {
-			panic("init logger error")
-		}
-		return logger
-	}
-	if ctxlogger, ok := ctx.Value("loggerkey").(*Logger); ok {
-		return ctxlogger
-	}
-	return nil
+func (l *Logger) Debug() *zerolog.Event {
+	return l.logger.Debug()
 }
 
-func (l *Logger) Debug(msg string) {
-	l.logger.Debug().Msg(msg)
+func (l *Logger) Name(fname string) *zerolog.Event {
+	return l.Debug().Str("Name", fname)
 }
