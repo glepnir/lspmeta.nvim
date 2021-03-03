@@ -27,7 +27,8 @@ endfunction
 call remote#host#Register(s:plugin_name, 'x', function('s:JobStart'))
 
 call remote#host#RegisterPlugin('lspmeta', '0', [
-\ {'type': 'command', 'name': 'LspInstall', 'sync': 0, 'opts': {'bang': ''}},
+\ {'type': 'function', 'name': 'GetUserLspConfig', 'sync': 1, 'opts': {}},
+\ {'type': 'function', 'name': 'TestFunc', 'sync': 1, 'opts': {}},
 \ ])
 
 let &cpo = s:save_cpo
